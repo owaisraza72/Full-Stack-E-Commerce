@@ -2,16 +2,17 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../features/auth/authApi";
 import { logoutUser } from "../features/auth/authSlice";
+import { clearCart } from "../features/cart/cartSlice";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { 
-  Search, 
-  ShoppingBag, 
-  User, 
-  Heart, 
-  Menu, 
-  X, 
+import {
+  Search,
+  ShoppingBag,
+  User,
+  Heart,
+  Menu,
+  X,
   ChevronDown,
   Bell,
   Package,
@@ -20,7 +21,7 @@ import {
   Gem,
   Home,
   Sparkles,
-  Tag
+  Tag,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -30,7 +31,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [logout] = useLogoutMutation();
-  
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -40,7 +41,8 @@ const Navbar = () => {
   const userMenuRef = useRef(null);
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const wishlistCount = useSelector((state) => state.wishlist?.items?.length) || 0;
+  const wishlistCount =
+    useSelector((state) => state.wishlist?.items?.length) || 0;
 
   // Update active link based on current path
   useEffect(() => {
@@ -52,8 +54,8 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Close menus when clicking outside
@@ -67,23 +69,23 @@ const Navbar = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Extract search query from URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const search = params.get('search') || '';
+    const search = params.get("search") || "";
     setSearchQuery(search);
   }, [location.search]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
     } else {
-      navigate("/");
+      navigate("/products");
     }
     setIsMenuOpen(false);
   };
@@ -92,11 +94,12 @@ const Navbar = () => {
     try {
       await logout().unwrap();
       dispatch(logoutUser());
+      dispatch(clearCart()); // Clear cart notifications on logout
       toast.success("Signed out successfully", {
-        icon: '👋',
+        icon: "👋",
         style: {
-          background: '#10B981',
-          color: '#fff',
+          background: "#10B981",
+          color: "#fff",
         },
       });
       navigate("/login");
@@ -109,42 +112,74 @@ const Navbar = () => {
   const navigationLinks = [
     { name: "Home", path: "/", icon: <Home size={16} /> },
     { name: "Collection", path: "/collection", icon: <Sparkles size={16} /> },
-    { name: "New", path: "/new-arrivals", icon: <Tag size={16} />, badge: "NEW" },
+    {
+      name: "New",
+      path: "/new-arrivals",
+      icon: <Tag size={16} />,
+      badge: "NEW",
+    },
     { name: "Designers", path: "/designers", icon: <Crown size={16} /> },
     { name: "Sale", path: "/sale", icon: <Tag size={16} />, badge: "50% OFF" },
   ];
 
-  const userMenuItems = user ? [
-    { icon: <User size={18} />, label: "My Profile", path: "/profile" },
-    { icon: <Package size={18} />, label: "Orders", path: "/orders", badge: user.orders?.count },
-    { icon: <Heart size={18} />, label: "Wishlist", path: "/wishlist", badge: wishlistCount },
-    { icon: <Star size={18} />, label: "Reviews", path: "/reviews" },
-    ...(user.role === "seller" ? [{ 
-      icon: <Crown size={18} />, 
-      label: "Seller Portal", 
-      path: "/seller",
-      color: "text-amber-600"
-    }] : []),
-    ...(user.role === "admin" ? [{ 
-      icon: <Gem size={18} />, 
-      label: "Admin", 
-      path: "/admin",
-      color: "text-violet-600"
-    }] : []),
-    { icon: <X size={18} />, label: "Sign Out", onClick: handleLogout, color: "text-red-500" },
-  ] : [];
+  const userMenuItems = user
+    ? [
+        { icon: <User size={18} />, label: "My Profile", path: "/profile" },
+        {
+          icon: <Package size={18} />,
+          label: "Orders",
+          path: "/orders",
+          badge: user.orders?.count,
+        },
+        {
+          icon: <Heart size={18} />,
+          label: "Wishlist",
+          path: "/wishlist",
+          badge: wishlistCount,
+        },
+        { icon: <Star size={18} />, label: "Reviews", path: "/reviews" },
+        ...(user.role === "seller"
+          ? [
+              {
+                icon: <Crown size={18} />,
+                label: "Seller Portal",
+                path: "/seller",
+                color: "text-amber-600",
+              },
+            ]
+          : []),
+        ...(user.role === "admin"
+          ? [
+              {
+                icon: <Gem size={18} />,
+                label: "Admin",
+                path: "/admin",
+                color: "text-violet-600",
+              },
+            ]
+          : []),
+        {
+          icon: <X size={18} />,
+          label: "Sign Out",
+          onClick: handleLogout,
+          color: "text-red-500",
+        },
+      ]
+    : [];
 
   const NavLink = ({ to, children, badge, icon, className = "" }) => (
     <Link
       to={to}
       className={`relative flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
-        activeLink === to 
-          ? 'text-amber-700 bg-amber-50' 
-          : 'text-gray-600 hover:text-amber-600 hover:bg-gray-50'
+        activeLink === to
+          ? "text-amber-700 bg-amber-50"
+          : "text-gray-600 hover:text-amber-600 hover:bg-gray-50"
       } ${className}`}
       onClick={() => setIsMenuOpen(false)}
     >
-      {icon && <span className="text-gray-400 group-hover:text-amber-500">{icon}</span>}
+      {icon && (
+        <span className="text-gray-400 group-hover:text-amber-500">{icon}</span>
+      )}
       <span className="font-medium text-sm tracking-wide">{children}</span>
       {badge && (
         <span className="absolute -top-1 -right-1 text-[10px] px-1.5 py-0.5 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-full font-bold">
@@ -174,26 +209,22 @@ const Navbar = () => {
         animate={{ y: 0 }}
         transition={{ duration: 0.4 }}
         className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-white/95 backdrop-blur-md shadow-sm' 
-            : 'bg-white border-b border-gray-100'
+          isScrolled
+            ? "bg-white/95 backdrop-blur-md shadow-sm"
+            : "bg-white border-b border-gray-100"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            
             {/* Left: Logo */}
             <div className="flex items-center gap-8">
               {/* Logo */}
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="flex items-center gap-3 group"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <motion.div
-                  whileHover={{ rotate: 12 }}
-                  className="relative"
-                >
+                <motion.div whileHover={{ rotate: 12 }} className="relative">
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-rose-500 rounded-xl flex items-center justify-center shadow-md shadow-amber-500/30">
                     <Gem className="w-5 h-5 text-white" />
                   </div>
@@ -212,9 +243,9 @@ const Navbar = () => {
               {/* Desktop Navigation Links */}
               <div className="hidden lg:flex items-center gap-1">
                 {navigationLinks.map((link) => (
-                  <NavLink 
-                    key={link.path} 
-                    to={link.path} 
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
                     badge={link.badge}
                     icon={link.icon}
                   >
@@ -248,7 +279,6 @@ const Navbar = () => {
 
             {/* Right: Action Icons */}
             <div className="flex items-center gap-3">
-              
               {/* Search Mobile */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -282,7 +312,7 @@ const Navbar = () => {
                       animate={{ scale: 1 }}
                       className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold"
                     >
-                      {wishlistCount > 9 ? '9+' : wishlistCount}
+                      {wishlistCount > 9 ? "9+" : wishlistCount}
                     </motion.span>
                   )}
                 </Link>
@@ -305,7 +335,7 @@ const Navbar = () => {
                       animate={{ scale: 1 }}
                       className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold"
                     >
-                      {cartCount > 9 ? '9+' : cartCount}
+                      {cartCount > 9 ? "9+" : cartCount}
                     </motion.span>
                   )}
                 </Link>
@@ -319,7 +349,7 @@ const Navbar = () => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                     className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all ${
-                      isUserMenuOpen ? 'bg-gray-50' : 'hover:bg-gray-50'
+                      isUserMenuOpen ? "bg-gray-50" : "hover:bg-gray-50"
                     }`}
                   >
                     <div className="w-8 h-8 bg-gradient-to-r from-amber-100 to-rose-100 rounded-full flex items-center justify-center border border-amber-200">
@@ -327,9 +357,9 @@ const Navbar = () => {
                         {user.name?.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <ChevronDown 
-                      size={14} 
-                      className={`text-gray-400 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`}
+                    <ChevronDown
+                      size={14}
+                      className={`text-gray-400 transition-transform duration-200 ${isUserMenuOpen ? "rotate-180" : ""}`}
                     />
                   </motion.button>
 
@@ -352,7 +382,9 @@ const Navbar = () => {
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate capitalize">{user.name}</p>
+                              <p className="text-sm font-medium text-gray-900 truncate capitalize">
+                                {user.name}
+                              </p>
                               <p className="text-xs text-gray-500 font-light uppercase">
                                 {user.role}
                               </p>
@@ -362,7 +394,7 @@ const Navbar = () => {
 
                         {/* Menu Items */}
                         <div className="py-1">
-                          {userMenuItems.map((item, index) => (
+                          {userMenuItems.map((item, index) =>
                             item.path ? (
                               <Link
                                 key={index}
@@ -371,12 +403,16 @@ const Navbar = () => {
                                   setIsUserMenuOpen(false);
                                   setIsMenuOpen(false);
                                 }}
-                                className={`flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors text-sm ${item.color || 'text-gray-700'}`}
+                                className={`flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors text-sm ${item.color || "text-gray-700"}`}
                               >
-                                <div className={`${item.color || 'text-gray-400'}`}>
+                                <div
+                                  className={`${item.color || "text-gray-400"}`}
+                                >
                                   {item.icon}
                                 </div>
-                                <span className="font-normal flex-1">{item.label}</span>
+                                <span className="font-normal flex-1">
+                                  {item.label}
+                                </span>
                                 {item.badge && item.badge > 0 && (
                                   <span className="text-xs px-1.5 py-0.5 bg-gray-100 rounded-full min-w-[20px] text-center">
                                     {item.badge}
@@ -390,15 +426,19 @@ const Navbar = () => {
                                   item.onClick?.();
                                   setIsUserMenuOpen(false);
                                 }}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors text-sm ${item.color || 'text-gray-700'}`}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 transition-colors text-sm ${item.color || "text-gray-700"}`}
                               >
-                                <div className={`${item.color || 'text-gray-400'}`}>
+                                <div
+                                  className={`${item.color || "text-gray-400"}`}
+                                >
                                   {item.icon}
                                 </div>
-                                <span className="font-normal flex-1 text-left">{item.label}</span>
+                                <span className="font-normal flex-1 text-left">
+                                  {item.label}
+                                </span>
                               </button>
-                            )
-                          ))}
+                            ),
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -443,13 +483,12 @@ const Navbar = () => {
           {isMenuOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
+              animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="lg:hidden bg-white border-t border-gray-100 overflow-hidden"
             >
               <div className="px-4 py-4 space-y-1">
-                
                 {/* Mobile Search */}
                 <form onSubmit={handleSearch} className="mb-4">
                   <div className="relative">
@@ -473,9 +512,9 @@ const Navbar = () => {
                       to={link.path}
                       onClick={() => setIsMenuOpen(false)}
                       className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
-                        activeLink === link.path 
-                          ? 'bg-amber-50 text-amber-700' 
-                          : 'text-gray-700 hover:bg-gray-50'
+                        activeLink === link.path
+                          ? "bg-amber-50 text-amber-700"
+                          : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
                       {link.icon}
@@ -535,7 +574,9 @@ const Navbar = () => {
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900 capitalize">{user.name}</p>
+                          <p className="text-sm font-medium text-gray-900 capitalize">
+                            {user.name}
+                          </p>
                           <p className="text-xs text-gray-500 font-light uppercase">
                             {user.role}
                           </p>
@@ -545,7 +586,7 @@ const Navbar = () => {
                     {userMenuItems.map((item, index) => (
                       <Link
                         key={index}
-                        to={item.path || '#'}
+                        to={item.path || "#"}
                         onClick={(e) => {
                           if (item.onClick) {
                             e.preventDefault();

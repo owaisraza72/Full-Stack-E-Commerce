@@ -21,12 +21,42 @@ const ProductDetail = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams();
+  const { id } = useParams(); // Get product ID from URL params
 
   const { user } = useSelector((state) => state.auth);
+  // Fetch product data using RTK Query
   const { data, isLoading, isError } = useGetProductQuery(id);
 
+  // Local state for selecting quantity
   const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = (qty = quantity) => {
+    if (!user) {
+      toast.error("Please log in to add items to your cart");
+      navigate("/login", {
+        state: {
+          from: `/product/${id}`,
+          action: "add_to_cart",
+          quantity: qty,
+        },
+      });
+      return;
+    }
+
+    if (!data?.product) return;
+
+    dispatch(addToCart({ ...data.product, quantity: qty }));
+    toast.success(`${data.product.name} added to cart!`);
+  };
+
+  useEffect(() => {
+    if (user && location.state?.action === "add_to_cart" && data?.product) {
+      const savedQty = location.state?.quantity || 1;
+      handleAddToCart(savedQty);
+      // Clear state to avoid repeat on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [user, location.state, data?.product]);
 
   if (isLoading)
     return (
@@ -59,34 +89,6 @@ const ProductDetail = () => {
     );
 
   const { product } = data;
-
-  const handleAddToCart = (qty = quantity) => {
-    if (!user) {
-      toast.error("Please log in to add items to your cart");
-      navigate("/login", {
-        state: {
-          from: `/product/${id}`,
-          action: "add_to_cart",
-          quantity: qty,
-        },
-      });
-      return;
-    }
-
-    if (!product) return;
-
-    dispatch(addToCart({ ...product, quantity: qty }));
-    toast.success(`${product.name} added to cart!`);
-  };
-
-  useEffect(() => {
-    if (user && location.state?.action === "add_to_cart" && product) {
-      const savedQty = location.state?.quantity || 1;
-      handleAddToCart(savedQty);
-      // Clear state to avoid repeat on refresh
-      window.history.replaceState({}, document.title);
-    }
-  }, [user, location.state, product]);
 
   return (
     <div className="bg-[#fcfcfd] py-16 min-h-screen">

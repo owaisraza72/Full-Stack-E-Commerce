@@ -12,14 +12,17 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, updateQuantity } from "../../features/cart/cartSlice";
 
 const Cart = () => {
+  // Redux state to management cart items
   const cartItems = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
 
+  // Calculate total price of all items in the cart
   const total = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
 
+  // If cart is empty, show a premium empty state message
   if (cartItems.length === 0) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">

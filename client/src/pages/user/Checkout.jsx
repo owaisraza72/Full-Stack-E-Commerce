@@ -17,13 +17,17 @@ import toast from "react-hot-toast";
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  // Fetch user and cart data from Redux store
+  const { user } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
+  // RTK Query mutation for creating an order
   const [createOrder, { isLoading }] = useCreateOrderMutation();
 
+  // Local state for shipping address details
   const [address, setAddress] = useState({
     firstName: "",
     lastName: "",
-    email: "",
+    email: user?.email || "", // Auto-fill email if user is logged in
     address: "",
     city: "",
     postalCode: "",
@@ -41,11 +45,13 @@ const Checkout = () => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
+    // Prevent placing order if cart is empty
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
 
+    // Format order data for the backend API
     const orderData = {
       items: cartItems.map((item) => ({
         product: item._id,
@@ -57,8 +63,10 @@ const Checkout = () => {
     };
 
     try {
+      // Trigger API call and wait for response
       await createOrder(orderData).unwrap();
       toast.success("Order placed successfully!");
+      // Clear cart on success and navigate to orders page
       dispatch(clearCart());
       navigate("/orders");
     } catch (err) {

@@ -2,6 +2,11 @@ const express = require("express");
 const { Product } = require("../model/product");
 const productRouter = express.Router();
 const { authMiddleware } = require("../middleware/auth");
+const {
+  addToCart,
+  getCart,
+  removeFromCart,
+} = require("../controller/cartController");
 
 /* ================= ADD PRODUCT (Seller / Admin) ================= */
 productRouter.post("/addProduct", authMiddleware, async (req, res) => {
@@ -97,5 +102,10 @@ productRouter.delete("/deleteProduct/:id", authMiddleware, async (req, res) => {
     res.status(400).send({ message: error.message });
   }
 });
+
+/* ================= CART ROUTES ================= */
+productRouter.post("/cart/add", authMiddleware, addToCart);
+productRouter.get("/cart", authMiddleware, getCart);
+productRouter.delete("/cart/remove/:productId", authMiddleware, removeFromCart);
 
 module.exports = { productRouter };

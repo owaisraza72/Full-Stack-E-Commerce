@@ -14,6 +14,7 @@ import Checkout from "../pages/user/Checkout";
 import Profile from "../pages/user/Profile";
 import Orders from "../pages/user/Orders";
 import OrderDetail from "../pages/user/OrderDetail";
+import AllProducts from "../pages/user/AllProducts";
 
 const AppRoutes = () => {
   return (
@@ -80,6 +81,7 @@ const AppRoutes = () => {
         }
       />
       <Route path="/product/:id" element={<ProductDetail />} />
+      <Route path="/products" element={<AllProducts />} />
 
       {/* Admin */}
       <Route
@@ -92,7 +94,53 @@ const AppRoutes = () => {
       >
         <Route path="users" element={<AdminUsers />} />
         <Route path="products" element={<AdminProducts />} />
+        {/* Placeholder for future admin features */}
+        <Route
+          path="orders"
+          element={
+            <div className="p-10 text-2xl font-bold">
+              Admin Orders Management (Coming Soon)
+            </div>
+          }
+        />
+        <Route
+          path="analytics"
+          element={
+            <div className="p-10 text-2xl font-bold">
+              Store Analytics (Coming Soon)
+            </div>
+          }
+        />
       </Route>
+
+      {/* Fallback for other navbar links */}
+      <Route path="/collection" element={<AllProducts />} />
+      <Route path="/new-arrivals" element={<AllProducts />} />
+      <Route path="/sale" element={<AllProducts />} />
+      <Route
+        path="/designers"
+        element={
+          <div className="p-20 text-center text-3xl font-bold font-heading">
+            Our Featured Designers (Coming Soon)
+          </div>
+        }
+      />
+      <Route
+        path="/wishlist"
+        element={
+          <div className="p-20 text-center text-3xl font-bold font-heading">
+            Your Wishlist (Coming Soon)
+          </div>
+        }
+      />
+      <Route
+        path="/reviews"
+        element={
+          <div className="p-20 text-center text-3xl font-bold font-heading">
+            Product Reviews (Coming Soon)
+          </div>
+        }
+      />
     </Routes>
   );
 };
