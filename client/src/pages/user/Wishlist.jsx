@@ -30,6 +30,7 @@ import toast from "react-hot-toast";
 
 const Wishlist = () => {
   const { items: wishlistItems } = useSelector((state) => state.wishlist);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -87,7 +88,7 @@ const Wishlist = () => {
   };
 
   const removeFromWishlist = (product) => {
-    dispatch(toggleWishlist(product));
+    dispatch(toggleWishlist({ product: product, userId: user?._id }));
     toast.success(`${product.name} removed from wishlist`, {
       icon: "🗑️",
       style: {

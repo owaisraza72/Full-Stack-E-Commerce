@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLoginMutation } from "../../features/auth/authApi";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../features/auth/authSlice";
+import { syncUserWishlist } from "../../features/wishlist/wishlistSlice";
 import toast from "react-hot-toast";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -44,6 +45,7 @@ const Login = () => {
       }
 
       dispatch(setUser(res.user));
+      dispatch(syncUserWishlist(res.user._id));
       toast.success("Welcome back! 🎉", { 
         id: loadToast,
         icon: '👋',

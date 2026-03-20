@@ -53,7 +53,7 @@ export const ProductCard = ({ product, index = 0 }) => {
       return;
     }
 
-    dispatch(toggleWishlist(p));
+    dispatch(toggleWishlist({ product: p, userId: user?._id }));
     toast.success(
       isWishlisted ? "Removed from wishlist" : "Added to your luxury wishlist",
       {

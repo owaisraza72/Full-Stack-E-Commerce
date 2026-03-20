@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { useGetProfileQuery } from "./features/auth/authApi";
 import { useDispatch } from "react-redux";
 import { setUser, finishCheckingAuth } from "./features/auth/authSlice";
+import { syncUserWishlist } from "./features/wishlist/wishlistSlice";
 import { useEffect } from "react";
 import { LoadingState } from "./pages/user/LoadingState";
 
@@ -17,8 +18,10 @@ const App = () => {
   useEffect(() => {
     if (isSuccess && data?.user) {
       dispatch(setUser(data.user));
+      dispatch(syncUserWishlist(data.user._id));
     } else if (isError || (!isLoading && !data)) {
       dispatch(finishCheckingAuth());
+      dispatch(syncUserWishlist(null)); // Sync guest wishlist
     }
   }, [isSuccess, isError, isLoading, data, dispatch]);
 

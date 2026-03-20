@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../features/auth/authApi";
 import { logoutUser } from "../features/auth/authSlice";
 import { clearCart } from "../features/cart/cartSlice";
+import { clearWishlist } from "../features/wishlist/wishlistSlice";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
@@ -96,6 +97,7 @@ const Navbar = () => {
       await logout().unwrap();
       dispatch(logoutUser());
       dispatch(clearCart()); // Clear cart notifications on logout
+      dispatch(clearWishlist()); // Clear wishlist on logout
       toast.success("Signed out successfully", {
         icon: "👋",
         style: {

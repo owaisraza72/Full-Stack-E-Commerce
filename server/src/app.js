@@ -37,5 +37,6 @@ connectDB()
     });
   })
   .catch((err) => {
+    
     console.log("Database connection failed", err);
   });
